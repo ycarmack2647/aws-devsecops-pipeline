@@ -1,0 +1,12 @@
+on:
+    push:
+      branches:
+        - main
+    workflow_dispatch:
+
+jobs:
+    terraform-apply:
+        uses: ./.github/workflows/terraform-apply.yml
+        permissions:
+            contents: read
+        secrets: inherit
