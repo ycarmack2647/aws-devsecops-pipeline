@@ -4,6 +4,12 @@ variable "resource_prefix" {
   default     = "dsb"
 }
 
+variable "eks_cluster_name" {
+  type        = string
+  description = "Name of the EKS Cluster"
+  default     = "dsb-devsecops-cluster"
+}
+
 variable "region" {
   type        = string
   description = "AWS Region"

@@ -15,7 +15,7 @@ module "default_bucket" {
 module "cluster_auth" {
   source = "./modules/eks-config"
 
-  eks_cluster_name = module.default_cluster.cluster_name
+  eks_cluster_name = var.eks_cluster_name
   roles = [{
     rolearn  = "${module.awsome_fastapi_pipeline.codebuild_iam_role_arn}"
     username = "${module.awsome_fastapi_pipeline.codebuild_iam_role_name}"
@@ -42,8 +42,8 @@ module "awsome_fastapi_pipeline" {
   repository_id = "The-DevSec-Blueprint/awsome-fastapi"
   branch_name   = "main"
 
-  eks_cluster_name = module.default_cluster.cluster_name
-  eks_cluster_arn  = module.default_cluster.cluster_arn
+  eks_cluster_name = var.eks_cluster_name
+  eks_cluster_arn  = "arn:aws:eks:${var.region}:${data.aws_caller_identity.current.account_id}:cluster/${var.eks_cluster_name}"
 
   compute_type     = "BUILD_GENERAL1_SMALL"
   build_image      = "aws/codebuild/standard:5.0"
@@ -55,6 +55,4 @@ module "awsome_fastapi_pipeline" {
 
   snyk_org_id = var.SNYK_ORG_ID
   snyk_token  = var.SNYK_TOKEN
-
-  depends_on = [module.default_cluster]
 }
