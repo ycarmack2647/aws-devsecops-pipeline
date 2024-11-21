@@ -62,5 +62,5 @@ phases:
         EOF
 artifacts:
   files:
-    - k8s-deployment.yaml
+    - '**/*'
   discard-paths: yes

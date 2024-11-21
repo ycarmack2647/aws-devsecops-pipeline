@@ -351,7 +351,7 @@ resource "aws_codebuild_project" "static_analysis_project" {
     environment_variable {
       name  = "SNYK_ORG_ID"
       value = aws_ssm_parameter.snyk_org_id.name
-      type  = "SECRETS_MANAGER"
+      type  = "PARAMETER_STORE"
     }
   }
 
