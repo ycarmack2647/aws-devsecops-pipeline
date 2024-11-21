@@ -1,12 +1,3 @@
-# Default Networking Configuration
-resource "aws_default_subnet" "default_subnet_a" {
-  availability_zone = "${var.region}a"
-}
-
-resource "aws_default_subnet" "default_subnet_b" {
-  availability_zone = "${var.region}b"
-}
-
 # Default Connnection to GitHub
 resource "aws_codestarconnections_connection" "default" {
   name          = "dsb-github-connection"
@@ -21,18 +12,21 @@ module "default_bucket" {
 }
 
 # EKS Cluster
-module "default_cluster" {
-  source       = "./modules/eks"
-  cluster_name = "${var.resource_prefix}-devsecops-cluster"
-  subnet_ids = [
-    aws_default_subnet.default_subnet_a.id,
-    aws_default_subnet.default_subnet_b.id
-  ]
-  node_group_min_size         = 1
-  node_group_max_size         = 3
-  node_group_desired_capacity = 2
-  instance_types              = ["t3.medium"]
-  node_group_disk_size        = 20
+module "cluster_auth" {
+  source = "./modules/eks-config"
+
+  eks_cluster_name = module.default_cluster.cluster_name
+  roles = [{
+    rolearn  = "${module.awsome_fastapi_pipeline.codebuild_iam_role_arn}"
+    username = "${module.awsome_fastapi_pipeline.codebuild_iam_role_name}"
+    groups   = ["system:masters"]
+  }]
+
+  users = [{
+    userarn  = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/damien"
+    username = "damien"
+    groups   = ["system:masters"]
+  }]
 }
 
 # Pipelines
@@ -50,6 +44,7 @@ module "awsome_fastapi_pipeline" {
 
   eks_cluster_name = module.default_cluster.cluster_name
   eks_cluster_arn  = module.default_cluster.cluster_arn
+
   compute_type     = "BUILD_GENERAL1_SMALL"
   build_image      = "aws/codebuild/standard:5.0"
   environment_type = "LINUX_CONTAINER"
@@ -60,4 +55,6 @@ module "awsome_fastapi_pipeline" {
 
   snyk_org_id = var.SNYK_ORG_ID
   snyk_token  = var.SNYK_TOKEN
+
+  depends_on = [module.default_cluster]
 }
