@@ -1,0 +1,92 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.9
+    commands:
+      - echo "Fetching AWS Account ID..."
+      - export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
+      - echo "AWS_ACCOUNT_ID is $AWS_ACCOUNT_ID"
+  pre_build:
+    commands:
+      - echo "Running pre-build steps..."
+      - python -m pip install --upgrade pip
+  build:
+    commands:
+      - echo "Building the project..."
+      - pip install -r requirements.txt
+  post_build:
+    commands:
+      - echo "Build completed. Packaging Docker image..."
+      - docker build -t $IMAGE_REPO_NAME:latest .
+      - docker tag $IMAGE_REPO_NAME:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:latest
+      - echo "Logging in to Amazon ECR..."
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:latest
+      - echo "Writing Kubernetes deployment file..."
+      - |
+        cat <<EOF > k8s-deployment.yaml
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: $IMAGE_REPO_NAME
+          namespace: default
+        spec:
+          replicas: 2
+          selector:
+            matchLabels:
+              app: $IMAGE_REPO_NAME
+          template:
+            metadata:
+              labels:
+                app: $IMAGE_REPO_NAME
+            spec:
+              containers:
+              - name: $IMAGE_REPO_NAME
+                image: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:latest
+                ports:
+                - containerPort: 80
+        ---
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: $IMAGE_REPO_NAME-service
+          namespace: default
+          labels:
+            app: $IMAGE_REPO_NAME
+        spec:
+          selector:
+            app: $IMAGE_REPO_NAME
+          ports:
+            - protocol: TCP
+              port: 80
+              targetPort: 80
+          type: ClusterIP  # Changed from LoadBalancer since we'll use an Ingress
+        ---
+        apiVersion: networking.k8s.io/v1
+        kind: Ingress
+        metadata:
+          name: $IMAGE_REPO_NAME-ingress
+          annotations:
+            kubernetes.io/ingress.class: alb
+            alb.ingress.kubernetes.io/scheme: internet-facing
+            alb.ingress.kubernetes.io/target-type: ip
+            alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":443}]'
+            alb.ingress.kubernetes.io/ssl-redirect: '443'
+        spec:
+          rules:
+            - http:
+                paths:
+                  - path: /
+                    pathType: Prefix
+                    backend:
+                      service:
+                        name: $IMAGE_REPO_NAME-service
+                        port:
+                          number: 80
+        EOF
+artifacts:
+  files:
+    - k8s-deployment.yaml
+  discard-paths: yes

@@ -1,0 +1,32 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.9
+    commands:
+      - echo "Installing dependency scanning tools..."
+      - pip install --upgrade pip
+      - curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh
+  pre_build:
+    commands:
+      - echo "Running pre-scan checks..."
+      - pip install -r requirements.txt
+  build:
+    commands:
+      - echo "Scanning dependencies for vulnerabilities with Trivy..."
+      - trivy fs --scanners vuln --severity HIGH,CRITICAL .
+  post_build:
+    commands:
+      - echo "Dependency scanning completed."
+
+artifacts:
+  files:
+    - "**/*"
+  discard-paths: yes
+
+reports:
+  trivy_vulnerabilities:
+    files:
+      - "trivy-results.json"
+    file-format: JSON
