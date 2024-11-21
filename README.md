@@ -1,6 +1,11 @@
 # AWS DevSecOps Pipeline - Terraform
 
-![Terraform Version](https://img.shields.io/badge/Terraform-%3E%3D_1.0-blue)
+![License](https://img.shields.io/github/license/The-DevSec-Blueprint/dsb-blogging-assistant?logo=license)
+![Terraform Cloud](https://img.shields.io/badge/Terraform-Registry-purple?logo=terraform)
+![GitHub Issues](https://img.shields.io/github/issues/The-DevSec-Blueprint/dsb-blogging-assistant?logo=github)
+![GitHub Forks](https://img.shields.io/github/forks/The-DevSec-Blueprint/dsb-blogging-assistant?logo=github)
+![GitHub Stars](https://img.shields.io/github/stars/The-DevSec-Blueprint/dsb-blogging-assistant?logo=github)
+![GitHub Last Commit](https://img.shields.io/github/last-commit/The-DevSec-Blueprint/dsb-blogging-assistant?logo=github)
 ![CI Status](https://github.com/The-DevSec-Blueprint/aws-devsecops-pipeline/actions/workflows/main.yml/badge.svg)
 
 ## Overview
