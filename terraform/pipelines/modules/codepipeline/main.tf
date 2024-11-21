@@ -178,8 +178,9 @@ resource "aws_iam_role_policy_attachment" "eks_buildprj_attach_role" {
 
 # Pipeline
 resource "aws_codepipeline" "pipeline" {
-  name     = var.repo_name
-  role_arn = aws_iam_role.pipeline_role.arn
+  name          = var.repo_name
+  role_arn      = aws_iam_role.pipeline_role.arn
+  pipeline_type = "V2"
 
   artifact_store {
     type     = "S3"
@@ -226,8 +227,8 @@ resource "aws_codepipeline" "pipeline" {
   }
 
   # Static Analysis Stage
-  /*stage {
-    name = "StaticAnalysis"
+  stage {
+    name = "Test"
 
     action {
       name            = "StaticCodeAnalysis"
@@ -241,11 +242,6 @@ resource "aws_codepipeline" "pipeline" {
         ProjectName = aws_codebuild_project.static_analysis_project.name
       }
     }
-  }
-
-  # Open Source Scanning Stage
-  stage {
-    name = "OSSSecurityScan"
 
     action {
       name            = "OSSDependencyScan"
@@ -259,7 +255,9 @@ resource "aws_codepipeline" "pipeline" {
         ProjectName = aws_codebuild_project.oss_scanning_project.name
       }
     }
-  }*/
+  }
+
+  # Open Source Scanning Stage
 
   stage {
     name = "Deploy"

@@ -42,6 +42,11 @@ resource "aws_iam_role_policy_attachment" "eks_vpc_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController"
 }
 
+resource "aws_iam_role_policy_attachment" "eks_ec2_policy" {
+  role       = aws_iam_role.eks_cluster_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+}
+
 # Create Node Group IAM Role
 resource "aws_iam_role" "eks_node_role" {
   name = "${var.cluster_name}-eks-node-role"
