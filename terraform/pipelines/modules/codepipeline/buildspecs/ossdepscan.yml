@@ -5,28 +5,25 @@ phases:
     runtime-versions:
       python: 3.9
     commands:
-      - echo "Installing dependency scanning tools..."
+      - echo "Installing container scanning tools..."
       - pip install --upgrade pip
       - curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh
   pre_build:
     commands:
-      - echo "Running pre-scan checks..."
-      - pip install -r requirements.txt
+      - echo "Building Docker Container"
+      - docker build -t $IMAGE_REPO_NAME:latest .
   build:
     commands:
-      - echo "Scanning dependencies for vulnerabilities with Trivy..."
-      - trivy fs --scanners vuln --severity HIGH,CRITICAL .
+      - echo "Scanning container for vulnerabilities with Trivy..."
+      # Fail the build on HIGH and CRITICAL vulnerabilities
+      #- ./bin/trivy image --severity HIGH,CRITICAL --exit-code 1 $IMAGE_REPO_NAME:latest
+      - ./bin/trivy image --severity HIGH,CRITICAL --exit-code 0 $IMAGE_REPO_NAME:latest
   post_build:
     commands:
-      - echo "Dependency scanning completed."
+      - echo "Container Scanning completed."
 
 artifacts:
   files:
     - "**/*"
   discard-paths: yes
-
-reports:
-  trivy_vulnerabilities:
-    files:
-      - "trivy-results.json"
-    file-format: JSON
+  

@@ -3,35 +3,27 @@ version: 0.2
 phases:
   install:
     runtime-versions:
-      nodejs: 16
+      nodejs: 20
+      python: 3.12
     commands:
       - echo "Installing Snyk CLI..."
       - npm install -g snyk
       - snyk auth ${SNYK_TOKEN}  # Authenticate using the Snyk token
   pre_build:
     commands:
-      - echo "Preparing for Snyk scanning..."
-      - snyk test --json > snyk_test_results.json || true  # Run dependency scanning
+      - echo "Installing dependencies..."
+      - pip install -r requirements.txt
   build:
     commands:
-      - echo "Running Snyk security checks..."
-      - snyk code --json > snyk_code_results.json || true  # Run code scanning
+      - echo "Preparing for Snyk dependency scanning..."
+      # Fail the build if high or critical vulnerabilities are found
+      - snyk test --file=requirements.txt --severity-threshold=high
+      - echo "Running Snyk code security checks..."
+      # Fail the build if high or critical code vulnerabilities are found
+      - snyk code test --severity-threshold=high
   post_build:
     commands:
       - echo "Snyk scanning completed."
-      - echo "Uploading reports..."
-artifacts:
-  files:
-    - snyk_test_results.json
-    - snyk_code_results.json
-  discard-paths: no
 
-reports:
-  snyk_vulnerabilities:
-    files:
-      - snyk_test_results.json
-    file-format: JSON
-  snyk_code_issues:
-    files:
-      - snyk_code_results.json
-    file-format: JSON
+artifacts:
+  discard-paths: no

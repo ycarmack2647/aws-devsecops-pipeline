@@ -151,6 +151,15 @@ resource "aws_iam_policy" "codebuild_policy" {
       {
         Effect = "Allow"
         Action = [
+          "codebuild:CreateReportGroup",
+          "codebuild:CreateReport",
+          "codebuild:UpdateReport"
+        ]
+        Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
           "ecr:GetDownloadUrlForLayer",
           "ecr:BatchGetImage",
           "ecr:GetAuthorizationToken",
@@ -377,6 +386,11 @@ resource "aws_codebuild_project" "oss_scanning_project" {
     image           = var.build_image
     type            = var.environment_type
     privileged_mode = var.privileged_mode
+
+    environment_variable {
+      name  = "IMAGE_REPO_NAME"
+      value = aws_ecr_repository.this.name
+    }
   }
 
   source {
