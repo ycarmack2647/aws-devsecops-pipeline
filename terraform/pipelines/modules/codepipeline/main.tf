@@ -30,7 +30,12 @@ resource "aws_iam_policy" "pipeline_policy" {
           "codebuild:*",
           "iam:PassRole",
           "secretsmanager:GetSecretValue",
-          "codestar-connections:UseConnection"
+          "codestar-connections:UseConnection",
+          "events:PutRule",
+          "events:PutTargets",
+          "events:DeleteRule",
+          "events:RemoveTargets",
+          "events:DescribeRule"
         ]
         Resource = "*"
       }
