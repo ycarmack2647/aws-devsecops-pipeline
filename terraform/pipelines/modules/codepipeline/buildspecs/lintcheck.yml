@@ -1,0 +1,27 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.12  # Specify the desired Python version
+    commands:
+      - echo "Installing required dependencies..."
+      - pip install --upgrade pip
+      - pip install -r requirements.txt
+      - pip install pylint  # Install pylint
+  pre_build:
+    commands:
+      - echo "Starting pylint checks..."
+  build:
+    commands:
+      - echo "Running pylint documentation check..."
+      - pylint src/ # Check for missing docstrings
+      - echo "Documentation check completed."
+  post_build:
+    commands:
+      - echo "Pylint documentation check completed successfully."
+
+artifacts:
+  files:
+    - "**/*"  # Include all files
+  discard-paths: yes

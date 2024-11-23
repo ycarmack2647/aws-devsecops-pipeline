@@ -1,0 +1,26 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.12  # Specify the desired Python version
+    commands:
+      - echo "Installing required dependencies..."
+      - pip install --upgrade pip
+      - pip install -r requirements.txt
+      - pip install black  # Install black
+  pre_build:
+    commands:
+      - echo "Starting format check with black..."
+  build:
+    commands:
+      - echo "Running black format check..."
+      - black --check src/  # Check formatting without modifying files
+  post_build:
+    commands:
+      - echo "Format check completed."
+
+artifacts:
+  files:
+    - "**/*"  # Include all files
+  discard-paths: yes

@@ -1,0 +1,27 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.12  # Specify the desired Python version
+    commands:
+      - echo "Installing required dependencies..."
+      - pip install --upgrade pip
+      - pip install -r requirements.txt
+      - pip install pytest pytest-cov  # Install pytest and pytest-cov for coverage reporting
+  pre_build:
+    commands:
+      - echo "Starting unit test process..."
+  build:
+    commands:
+      - echo "Running pytest with coverage reporting..."
+      # Run tests and generate coverage report
+      - pytest --cov=src --cov-report=xml --cov-report=term-missing --cov-fail-under=80
+  post_build:
+    commands:
+      - echo "Unit testing and coverage reporting completed."
+
+artifacts:
+  files:
+    - "coverage.xml"  # Include the coverage report as an artifact
+  discard-paths: yes

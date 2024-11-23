@@ -240,12 +240,55 @@ resource "aws_codepipeline" "pipeline" {
     name = "Test"
 
     action {
-      name            = "StaticCodeAnalysis"
+      name            = "FormatCheck"
       category        = "Test"
       owner           = "AWS"
       provider        = "CodeBuild"
       version         = "1"
       input_artifacts = ["BuildArtifact"]
+      run_order       = 1
+
+      configuration = {
+        ProjectName = aws_codebuild_project.format_check_project.name
+      }
+    }
+
+    action {
+      name            = "LintCheck"
+      category        = "Test"
+      owner           = "AWS"
+      provider        = "CodeBuild"
+      version         = "1"
+      input_artifacts = ["BuildArtifact"]
+      run_order       = 1
+
+      configuration = {
+        ProjectName = aws_codebuild_project.lint_check_project.name
+      }
+    }
+
+    action {
+      name            = "RunUnitTests"
+      category        = "Test"
+      owner           = "AWS"
+      provider        = "CodeBuild"
+      version         = "1"
+      input_artifacts = ["BuildArtifact"]
+      run_order       = 2
+
+      configuration = {
+        ProjectName = aws_codebuild_project.unittest_project.name
+      }
+    }
+
+    action {
+      name            = "SnykSecurityScan"
+      category        = "Test"
+      owner           = "AWS"
+      provider        = "CodeBuild"
+      version         = "1"
+      input_artifacts = ["BuildArtifact"]
+      run_order       = 3
 
       configuration = {
         ProjectName = aws_codebuild_project.static_analysis_project.name
@@ -253,12 +296,13 @@ resource "aws_codepipeline" "pipeline" {
     }
 
     action {
-      name            = "OSSDependencyScan"
+      name            = "ContainerSecurityScan"
       category        = "Test"
       owner           = "AWS"
       provider        = "CodeBuild"
       version         = "1"
       input_artifacts = ["BuildArtifact"]
+      run_order       = 3
 
       configuration = {
         ProjectName = aws_codebuild_project.oss_scanning_project.name
@@ -305,6 +349,88 @@ resource "aws_codebuild_project" "build_project" {
   source {
     type      = "NO_SOURCE"
     buildspec = var.buildspec_path
+  }
+
+  artifacts {
+    type     = "S3"
+    location = var.s3_bucket_name
+  }
+}
+
+resource "aws_codebuild_project" "format_check_project" {
+  name         = "${var.repo_name}-formatcheck-project"
+  service_role = aws_iam_role.codebuild_role.arn
+
+  environment {
+    compute_type    = var.compute_type
+    image           = var.build_image
+    type            = var.environment_type
+    privileged_mode = var.privileged_mode
+
+    environment_variable {
+      name  = "IMAGE_REPO_NAME"
+      value = aws_ecr_repository.this.name
+    }
+  }
+
+  source {
+    type      = "NO_SOURCE"
+    buildspec = file("${path.module}/buildspecs/formatcheck.yml")
+  }
+
+  artifacts {
+    type     = "S3"
+    location = var.s3_bucket_name
+  }
+}
+
+resource "aws_codebuild_project" "unittest_project" {
+  name         = "${var.repo_name}-unittest-project"
+  service_role = aws_iam_role.codebuild_role.arn
+
+  environment {
+    compute_type    = var.compute_type
+    image           = var.build_image
+    type            = var.environment_type
+    privileged_mode = var.privileged_mode
+
+    environment_variable {
+      name  = "IMAGE_REPO_NAME"
+      value = aws_ecr_repository.this.name
+    }
+  }
+
+  source {
+    type      = "NO_SOURCE"
+    buildspec = file("${path.module}/buildspecs/unittests.yml")
+  }
+
+  artifacts {
+    type     = "S3"
+    location = var.s3_bucket_name
+  }
+}
+
+
+resource "aws_codebuild_project" "lint_check_project" {
+  name         = "${var.repo_name}-lintcheck-project"
+  service_role = aws_iam_role.codebuild_role.arn
+
+  environment {
+    compute_type    = var.compute_type
+    image           = var.build_image
+    type            = var.environment_type
+    privileged_mode = var.privileged_mode
+
+    environment_variable {
+      name  = "IMAGE_REPO_NAME"
+      value = aws_ecr_repository.this.name
+    }
+  }
+
+  source {
+    type      = "NO_SOURCE"
+    buildspec = file("${path.module}/buildspecs/lintcheck.yml")
   }
 
   artifacts {
