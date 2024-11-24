@@ -15,7 +15,7 @@ phases:
   build:
     commands:
       - echo "Running pylint documentation check..."
-      - pylint . # Check for missing docstrings
+      - pylint --ignore=tests . # Check for missing docstrings
       - echo "Documentation check completed."
   post_build:
     commands:

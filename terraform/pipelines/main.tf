@@ -1,6 +1,10 @@
 # Default Connnection to GitHub
+resource "random_id" "id" {
+  byte_length = 4
+}
+
 resource "aws_codestarconnections_connection" "default" {
-  name          = "dsb-github-connection"
+  name          = "dsb-github-connection-${random_id.id.hex}"
   provider_type = "GitHub"
 }
 

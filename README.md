@@ -31,13 +31,15 @@ This project provides an automated DevSecOps pipeline for deploying infrastructu
 
 - Clone or download this repository.
 - Update the `terraform-apply.yml` file with your organization name.
-- Modify the `provider.tf` file to include your correct Terraform Cloud workspace name (do not use "DSB").
-- Move into the `terraform` directory, and enter in the following commands:
+- Within `terraform/eks-cluster` and `terraform/pipelines`, carryo out the follwowing:
 
-```bash
-terraform init
-terraform plan
-```
+  - Modify the `provider.tf` file to include your correct Terraform Cloud workspace name (do not use "DSB").
+  - Run the following commands to ensure things work properly:
+
+  ```bash
+  terraform init
+  terraform plan
+  ```
 
 ### 3. **Configure Snyk**
 

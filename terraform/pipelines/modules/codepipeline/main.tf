@@ -250,7 +250,7 @@ resource "aws_codepipeline" "pipeline" {
       owner           = "AWS"
       provider        = "CodeBuild"
       version         = "1"
-      input_artifacts = ["BuildArtifact"]
+      input_artifacts = ["SourceArtifact"]
       run_order       = 1
 
       configuration = {
@@ -264,7 +264,7 @@ resource "aws_codepipeline" "pipeline" {
       owner           = "AWS"
       provider        = "CodeBuild"
       version         = "1"
-      input_artifacts = ["BuildArtifact"]
+      input_artifacts = ["SourceArtifact"]
       run_order       = 1
 
       configuration = {
@@ -278,7 +278,7 @@ resource "aws_codepipeline" "pipeline" {
       owner           = "AWS"
       provider        = "CodeBuild"
       version         = "1"
-      input_artifacts = ["BuildArtifact"]
+      input_artifacts = ["SourceArtifact"]
       run_order       = 2
 
       configuration = {
@@ -292,7 +292,7 @@ resource "aws_codepipeline" "pipeline" {
       owner           = "AWS"
       provider        = "CodeBuild"
       version         = "1"
-      input_artifacts = ["BuildArtifact"]
+      input_artifacts = ["SourceArtifact"]
       run_order       = 3
 
       configuration = {
@@ -306,7 +306,7 @@ resource "aws_codepipeline" "pipeline" {
       owner           = "AWS"
       provider        = "CodeBuild"
       version         = "1"
-      input_artifacts = ["BuildArtifact"]
+      input_artifacts = ["SourceArtifact"]
       run_order       = 3
 
       configuration = {
@@ -329,6 +329,18 @@ resource "aws_codepipeline" "pipeline" {
       input_artifacts = ["BuildArtifact"]
       configuration = {
         ProjectName = aws_codebuild_project.deploy_project.name
+      }
+    }
+  }
+
+  trigger {
+    provider_type = "CodeStarSourceConnection"
+    git_configuration {
+      source_action_name = "Source"
+      push {
+        branches {
+          includes = ["main"]
+        }
       }
     }
   }
