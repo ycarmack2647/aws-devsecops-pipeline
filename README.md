@@ -56,7 +56,7 @@ Set up the following environment variables within your Terraform Cloud workspace
 
 ### 5. **Terraform Initialization and Apply**
 
-Run the following commands to initialize Terraform, plan the deployment, and apply the changes:
+Run the following commands in both the `eks-cluster` and `pipelines` folder to initialize Terraform, plan the deployment, and apply the changes:
 
 ```bash
 terraform apply
